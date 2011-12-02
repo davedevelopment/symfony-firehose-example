@@ -40,11 +40,12 @@ $app['dispatcher']->addFireHoseListener(function($eventName, Event $event) use (
     }
 });
 
-$app['dispatcher.queue.dsn'] = 'tcp://localhost:5567';
+$app['dispatcher.queue.pub.dsn'] = 'tcp://localhost:5567';
+$app['dispatcher.queue.sub.dsn'] = 'tcp://localhost:5566';
 $app['dispatcher.queue.pub'] = $app->share(function($c) {
     $ctx = new ZMQContext();
     $send = $ctx->getSocket(ZMQ::SOCKET_PUSH);
-    $send->connect($c['dispatcher.queue.dsn']);
+    $send->connect($c['dispatcher.queue.pub.dsn']);
     return $send;
 });
 
@@ -141,7 +142,7 @@ $app->post('/blog/{post}/comments', function(Application $app, array $post) {
     $app['dispatcher']->dispatch('blog.comments.new', $event);
 
     return new Response(
-        json_encode($comment), 
+        json_encode($comment) . "\n", 
         201, 
         array(
             'Content-type' => 'application/json',

@@ -16,7 +16,7 @@ $app = include __DIR__.'/app.php';
 $ctx = new ZMQContext();
 $sub = $ctx->getSocket(ZMQ::SOCKET_SUB);
 $sub->setSockOpt(ZMQ::SOCKOPT_SUBSCRIBE, '');
-$sub->connect('tcp://localhost:5566');
+$sub->connect($app['dispatcher.queue.sub.dsn']);
 $poll = new ZMQPoll();
 $poll->add($sub, ZMQ::POLL_IN);
 $read = $wri = array();
