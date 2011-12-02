@@ -1,0 +1,3 @@
+[submodule "vendor/atst"]
+	path = vendor/atst
+	url = git@github.com:davedevelopment/atst.git
