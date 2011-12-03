@@ -24,7 +24,7 @@ $app = new Application();
 $app['autoloader']->registerNamespace('Atst', __DIR__.'/vendor/atst/src');
 
 $app['base_dispatcher'] = $app['dispatcher'];
-$app['dispatcher.async_prefix'] = 'async.';
+$app['dispatcher.async'] = true;
 $app['dispatcher'] = $app->share(function($c) {
     $firehose = new FireHose($c['base_dispatcher']);
     return $firehose;
@@ -36,7 +36,15 @@ $app['dispatcher']->addFireHoseListener(function($eventName, Event $event) use (
      * want to switch this on class type of the event
      */ 
     if (0 !== strpos($eventName, 'kernel.') && 0 !== strpos($eventName, 'silex.')) { 
-        $app['dispatcher.queue.pub']->send(serialize(array($eventName, $event)));
+
+        $eventName = 'async.' . $eventName;
+
+        if ($app['dispatcher.async']) {
+            $app['dispatcher.queue.pub']->send(serialize(array($eventName, $event)));
+        } else {
+            $app['dispatcher']->oneTimeDisableFireHose();
+            $app['dispatcher']->dispatch($eventName, $event);
+        }
     }
 });
 
@@ -114,7 +122,7 @@ $app->get('/blog/{post}/comment/{comment}', function(Application $app, array $po
 /**
  * Send an email to the author on new comments
  */
-$app['dispatcher']->addListener($app['dispatcher.async_prefix'] . 'blog.comments.new', function(Event $event) use ($app) {
+$app['dispatcher']->addListener('async.blog.comments.new', function(Event $event) use ($app) {
 
     if (php_sapi_name() == 'cli') {
         echo "Sending mail...\n";

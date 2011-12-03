@@ -26,7 +26,7 @@ while(true) {
         list($eventName, $event) = unserialize($sub->recv());
         echo "Refiring $eventName\n";
         $app['dispatcher']->oneTimeDisableFireHose();
-        $app['dispatcher']->dispatch($app['dispatcher.async_prefix'] .  $eventName, $event);
+        $app['dispatcher']->dispatch($eventName, $event);
     }
 }
 
